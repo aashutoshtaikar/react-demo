@@ -1,13 +1,6 @@
 import express from "express";
 import cors from "cors";
-import "dotenv/config";
-import multer from "multer";
-
-import initKnex from "knex";
-import configuration from "./knexfile.js";
-
-const knex = initKnex(configuration);
-
+import userRoute from "./routes/userRoute.js"
 
 const PORT = process.env.PORT || 5050;
 const app = express();
@@ -15,25 +8,43 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Set up multer for handling file uploads
-const storage = multer.memoryStorage(); // Store the file in memory as a buffer
-const upload = multer({ storage: storage });
+app.use('/api', userRoute)
 
-app.post('/upload', upload.single('image'), async (req, res) => {
+
+// app.post('/upload', upload.single('image'), async (req, res) => {
+//     try {
+//       const { name } = req.body;
+//       const fileBuffer = req.file.buffer; // File data as a Buffer
+//       const fileName = req.file.originalname; // Original file name
+  
+//       // Insert the file into the database
+//       await knex('users').insert({
+//         name: name,
+//         image: fileBuffer // Storing the file as a binary blob
+//       });
+  
+//       res.status(200).json({ message: 'File uploaded successfully', fileName: fileName });
+//     } catch (error) {
+//       res.status(500).json({ message: 'File upload failed', error: error.message });
+//     }
+//   });
+
+  app.get('/images/:id', async (req, res) => {
+    const { id } = req.params;
+  
     try {
-      const { name } = req.body;
-      const fileBuffer = req.file.buffer; // File data as a Buffer
-      const fileName = req.file.originalname; // Original file name
+      const user = await knex('users').where({ id }).first();
   
-      // Insert the file into the database
-      await knex('users').insert({
-        name: name,
-        image: fileBuffer // Storing the file as a binary blob
-      });
+      if (!user || !user.image) {
+        return res.status(404).send('Image not found');
+      }
   
-      res.status(200).json({ message: 'File uploaded successfully', fileName: fileName });
+      res.setHeader('Content-Type', 'image/jpeg'); // Adjust content type based on your image format
+      res.send(user.image);
+  
     } catch (error) {
-      res.status(500).json({ message: 'File upload failed', error: error.message });
+      console.error('Error fetching image:', error);
+      res.status(500).send('Server error');
     }
   });
 
