@@ -10,11 +10,14 @@ const createUser = async (req, res) => {
         const { name } = req.body;
         const fileBuffer = req.file.buffer; // File data as a Buffer
         const fileName = req.file.originalname; // Original file name
-    
+        const splitFileName = fileName.toString().split(".");
+        const fileType = splitFileName[splitFileName.length-1];
+
         // Insert the file into the database
         await knex('users').insert({
           name: name,
-          image: fileBuffer // Storing the file as a binary blob
+          image: fileBuffer, // Storing the file as a binary blob
+          image_type: fileType
         });
     
         res.status(200).json({ message: 'File uploaded successfully', fileName: fileName });

@@ -11,7 +11,7 @@ const upload = multer({ storage: storage });
 router
     .route("/users")
     .get(userController.getAllUsers)
-    .post(upload.single('image'), userController.getAllUsers)
+    .post(upload.single('image'), userController.createUser)
 
 router
     .route("/users/:id")
