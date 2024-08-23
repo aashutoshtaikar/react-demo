@@ -1,0 +1,14 @@
+.userCard{
+
+    display: flex;
+
+    &__imgBox{
+        display: flex;
+        flex-direction: column;
+    }
+
+    &__img{
+        width: 10rem;
+        height: 10rem;
+    }
+}

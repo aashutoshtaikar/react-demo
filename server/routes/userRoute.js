@@ -17,5 +17,9 @@ router
     .route("/users/:id")
     .get(userController.getUserById)
 
+router
+    .route("/users/images/:id")
+    .get(userController.getImageByUserId)
+
 
 export default router;

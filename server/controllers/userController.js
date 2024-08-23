@@ -29,27 +29,17 @@ const createUser = async (req, res) => {
 const getAllUsers = async (req, res) => {
   
     try {
-      const users = await knex('users');
+      const users = await knex('users')
+        .select(
+          "users.id",
+          "users.name"
+        );
   
       if (!users) {
         return res.status(404).send('User not found');
       }
-  
-      const userData = users.map(user => {
-        // Convert image to Base64
-        const imageBase64 = user.image ? user.image.toString('base64') : null;
-        
-        // Create a combined response with user data and image in Base64
-        return {
-            id: user.id,
-            name: user.name,
-            image: imageBase64,
-            created_at: user.created_at,
-            updated_at: user.updated_at
-        };
-      })
 
-      res.json(userData);
+      res.json(users);
   
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -61,23 +51,17 @@ const getUserById = async (req, res) => {
     const { id } = req.params;
   
     try {
-      const user = await knex('users').where({ id }).first();
+      const user = await knex('users')
+        .select(
+          "users.id",
+          "users.name"
+        )
+        .where({ id })
+        .first();
   
       if (!user) {
         return res.status(404).send('User not found');
       }
-  
-      // Convert image to Base64
-      const imageBase64 = user.image ? user.image.toString('base64') : null;
-  
-      // Create a combined response with user data and image in Base64
-      const userData = {
-        id: user.id,
-        name: user.name,
-        image: imageBase64,
-        created_at: user.created_at,
-        updated_at: user.updated_at
-      };
   
       res.json(userData);
   
@@ -87,4 +71,32 @@ const getUserById = async (req, res) => {
     }
 }
 
-export { createUser, getAllUsers, getUserById }
+const getImageByUserId = async(req, res) => {
+  const { id } = req.params;
+  
+    try {
+      const user = await knex('users').where({ id }).first();
+  
+      if (!user) {
+        return res.status(404).send('User not found');
+      }
+  
+      let imageData = null;
+      if (user.image) {
+        const imageBase64 = user.image ? user.image.toString('base64') : null;
+      
+        imageData = {
+          image: imageBase64,
+          image_type: user.image_type
+        }  
+      }
+      
+      res.json(imageData);
+  
+    } catch (error) {
+      console.error('Error fetching user image data:', error);
+      res.status(500).send('Server error');
+    }
+}
+
+export { createUser, getAllUsers, getUserById, getImageByUserId }
